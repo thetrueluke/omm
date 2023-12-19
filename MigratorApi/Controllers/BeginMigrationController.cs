@@ -32,7 +32,7 @@ namespace MigratorApi.Controllers
                 var destinationProvider = MailProviderFactory.GetMailProvier(spec.DestinationMailProvider) ?? throw new ArgumentException($"No such mail provider: {spec.DestinationMailProvider}");
 
                 var sourceMailbox = await sourceProvider.GetMailbox(spec.Mailbox.Name, spec.Mailbox.Password);
-                await sourceProvider.CreateMailbox(spec.Mailbox);
+                await destinationProvider.CreateMailbox(spec.Mailbox);
 
                 EnqueueMails(destinationProvider, sourceMailbox);
 
