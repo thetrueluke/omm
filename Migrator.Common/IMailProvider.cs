@@ -2,13 +2,16 @@
 {
     public interface IMailProvider
     {
-        Mailbox GetMailbox(string username, string password);
-
-        IEnumerable<IMail> GetMails(Mailbox mailbox);
+        string Name { get; }
 
 
-        Mailbox CreateMailbox(string username, string password);
+        Task<Mailbox> GetMailbox(string username, string password);
 
-        void WriteMail(Mailbox mailbox, IMail mail);
+        Task<IEnumerable<IMail>> GetMails(Mailbox mailbox);
+
+
+        Task CreateMailbox(Mailbox mailbox);
+
+        Task WriteMail(Mailbox mailbox, IMail mail);
     }
 }
