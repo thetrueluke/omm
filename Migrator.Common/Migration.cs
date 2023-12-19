@@ -10,5 +10,6 @@ namespace Migrator.Common
     {
         public const string HostName = "localhost";
         public const string QueueName = "ommmigration";
+        public const string PathBase = @"D:\omm\";
     }
 }

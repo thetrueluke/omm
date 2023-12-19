@@ -8,9 +8,11 @@ namespace Migrator.Common
 {
     public interface IMail
     {
-        string Subject { get; }
-        string Body { get; }
+        string? Subject { get; }
+        string? Body { get; }
         string Sender { get; }
         string Receiver { get; }
+
+        int Size { get; }
     }
 }
