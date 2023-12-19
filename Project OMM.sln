@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmmMigration", "OmmMigratio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigratorWorker", "MigratorWorker\MigratorWorker.csproj", "{99130F1F-3288-41AF-BB09-84513A57634B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator.Common", "Migrator.Common\Migrator.Common.csproj", "{F5C9F034-F9D4-411D-8B13-194D9C0664E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{99130F1F-3288-41AF-BB09-84513A57634B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99130F1F-3288-41AF-BB09-84513A57634B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99130F1F-3288-41AF-BB09-84513A57634B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5C9F034-F9D4-411D-8B13-194D9C0664E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5C9F034-F9D4-411D-8B13-194D9C0664E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5C9F034-F9D4-411D-8B13-194D9C0664E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5C9F034-F9D4-411D-8B13-194D9C0664E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
