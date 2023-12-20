@@ -34,7 +34,7 @@ namespace MigratorApi.Controllers
                 var sourceMailbox = await sourceProvider.GetMailbox(spec.Mailbox.Name, spec.Mailbox.Password);
                 await destinationProvider.CreateMailbox(spec.Mailbox);
 
-                EnqueueMails(destinationProvider, sourceMailbox);
+                EnqueueMails(sourceProvider, destinationProvider, sourceMailbox);
 
                 return Ok();
             }
@@ -56,7 +56,7 @@ namespace MigratorApi.Controllers
             }
         }
 
-        private void EnqueueMails(IMailProvider destinationProvider, Mailbox sourceMailbox)
+        private void EnqueueMails(IMailProvider sourceProvider, IMailProvider destinationProvider, Mailbox sourceMailbox)
         {
             Task.Run(() =>
             {
@@ -70,7 +70,7 @@ namespace MigratorApi.Controllers
                                      autoDelete: false,
                                      arguments: null);
 
-                var mails = destinationProvider.GetMails(sourceMailbox).Result;
+                var mails = sourceProvider.GetMails(sourceMailbox).Result;
                 foreach (var mail in mails)
                 {
                     var data = new MigrationData()

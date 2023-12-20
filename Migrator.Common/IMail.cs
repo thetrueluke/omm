@@ -14,5 +14,6 @@ namespace Migrator.Common
         string Receiver { get; }
 
         int Size { get; }
+        string? Folder { get; }
     }
 }
