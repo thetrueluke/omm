@@ -35,6 +35,7 @@ consumer.Received += (model, ea) =>
         {
             var destinationProvider = MailProviderFactory.GetMailProvier(data.ProviderName) ?? throw new Exception($"No such mail provider: {data.ProviderName}");
             destinationProvider.WriteMail(data.Mailbox, data.Mail);
+            Console.WriteLine($"Added mail to mailbox {data.Mailbox.Name}");
         }
         else
         {
