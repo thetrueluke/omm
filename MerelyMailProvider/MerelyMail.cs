@@ -10,12 +10,11 @@ namespace MerelyMailProvider
     public class MerelyMail : IMail
     {
         public required string Subject { get; set; }
-        public string? Body { get; }
+        public string? Body { get; set; }
         public required string Sender { get; set; }
         public required string Receiver { get; set; }
         public int Size { get; set; }
 
-        public int MailboxId { get; set; }
-        public int FolderId { get; set; }
+        public string? Folder { get; set; }
     }
 }
