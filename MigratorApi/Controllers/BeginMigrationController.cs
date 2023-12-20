@@ -17,12 +17,6 @@ namespace MigratorApi.Controllers
             logger.LogInformation(new AlmostMailProvider.AlmostMailProvider().Name);
         }
 
-        //[HttpGet]
-        //public IActionResult GetUsers()
-        //{
-        //    return Ok(users);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> BeginMigration(MigrationSpec spec)
         {
@@ -31,10 +25,10 @@ namespace MigratorApi.Controllers
                 var sourceProvider = MailProviderFactory.GetMailProvier(spec.SourceMailProvider) ?? throw new ArgumentException($"No such mail provider: {spec.SourceMailProvider}");
                 var destinationProvider = MailProviderFactory.GetMailProvier(spec.DestinationMailProvider) ?? throw new ArgumentException($"No such mail provider: {spec.DestinationMailProvider}");
 
-                var sourceMailbox = await sourceProvider.GetMailbox(spec.Mailbox.Name, spec.Mailbox.Password);
+                var mailbox = await sourceProvider.GetMailbox(spec.Mailbox.Name, spec.Mailbox.Password);
                 await destinationProvider.CreateMailbox(spec.Mailbox);
 
-                EnqueueMails(sourceProvider, destinationProvider, sourceMailbox);
+                EnqueueMails(sourceProvider, destinationProvider, mailbox);
 
                 return Ok();
             }
@@ -56,7 +50,7 @@ namespace MigratorApi.Controllers
             }
         }
 
-        private void EnqueueMails(IMailProvider sourceProvider, IMailProvider destinationProvider, Mailbox sourceMailbox)
+        private void EnqueueMails(IMailProvider sourceProvider, IMailProvider destinationProvider, Mailbox mailbox)
         {
             Task.Run(() =>
             {
@@ -70,12 +64,13 @@ namespace MigratorApi.Controllers
                                      autoDelete: false,
                                      arguments: null);
 
-                var mails = sourceProvider.GetMails(sourceMailbox).Result;
+                var mails = sourceProvider.GetMails(mailbox).Result;
                 foreach (var mail in mails)
                 {
                     var data = new MigrationData()
                     {
                         Mail = mail,
+                        Mailbox = mailbox,
                         ProviderName = destinationProvider.Name
                     };
                     var body = data.Serialize();

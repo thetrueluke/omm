@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+//JsonConvert used here because, unlike json💩net, it has reliable TypeNameHandling.
+//Of course, in a production system this wouldn't be nesessary, as resolving types would be handled by a json converter.
 
 namespace Migrator.Common
 {
@@ -12,24 +13,26 @@ namespace Migrator.Common
     {
         public required string ProviderName { get; init; }
 
+        public required Mailbox Mailbox { get; init; }
+
         public required IMail Mail { get; init; }
 
 
         public byte[] Serialize()
-        {
-            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this));
+        {            
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this, GetSerializerOptions()));
         }
 
         public static MigrationData? Deserialize(byte[] data)
         {
-            return JsonSerializer.Deserialize<MigrationData>(Encoding.UTF8.GetString(data));
+            return JsonConvert.DeserializeObject<MigrationData>(Encoding.UTF8.GetString(data), GetSerializerOptions());
         }
 
-        private static JsonSerializerOptions GetSerializerOptions()
+        private static JsonSerializerSettings GetSerializerOptions()
         {
-            return new JsonSerializerOptions()
+            return new JsonSerializerSettings()
             {
-                ReferenceHandler = ReferenceHandler.Preserve
+                TypeNameHandling = TypeNameHandling.All
             };
         }
     }

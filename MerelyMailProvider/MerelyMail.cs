@@ -14,7 +14,6 @@ namespace MerelyMailProvider
         public required string Sender { get; set; }
         public required string Receiver { get; set; }
         public int Size { get; set; }
-
         public string? Folder { get; set; }
     }
 }

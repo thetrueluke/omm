@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AlmostMailProvider
 {
-    internal class Mail
+    internal class Mailbox
     {
         public double MailboxSize { get; set; }
         public int MailboxQuota { get; set; }
-        public AlmostMail[]? Mails { get; set; }
+        public List<AlmostMail>? Mails { get; set; }
         public required string Password { get; set; }
     }
 }
