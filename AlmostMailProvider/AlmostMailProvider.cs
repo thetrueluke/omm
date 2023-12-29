@@ -81,6 +81,10 @@ namespace AlmostMailProvider
                     mutex.WaitOne();
                     var fileContents = File.ReadAllText(filename);
                     var fmailbox = GetMailbox(fileContents) ?? throw new Exception($"Mailbox {mailbox.Name} corrupt.");
+                    if (fmailbox.Password != mailbox.Password)
+                    {
+                        throw new Exception($"Password incorrect for source mailbox of name {mailbox.Name}.");
+                    }
                     fmailbox.Mails ??= [];
                     fmailbox.Mails.Add(new AlmostMail()
                     {
