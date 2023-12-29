@@ -44,7 +44,7 @@ namespace MigratorApi.Controllers
             {
                 return NotFound(knfex.Message);
             }
-            catch (AuthenticationException authex)
+            catch (UnauthorizedAccessException authex)
             {
                 return Unauthorized(authex.Message);
             }

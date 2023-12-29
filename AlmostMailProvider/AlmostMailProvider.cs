@@ -16,6 +16,41 @@ namespace AlmostMailProvider
 
         public string Name => GetType().Name.Replace("Provider", "");
 
+        public async Task<Migrator.Common.Mailbox> GetMailbox(string username, string password)
+        {
+            var filename = GetFilename(username);
+            var fileContents = await File.ReadAllTextAsync(filename);
+            var mailbox = GetMailbox(fileContents);
+            if (mailbox is not null)
+            {
+                if (mailbox.Password == password)
+                {
+                    return new Migrator.Common.Mailbox()
+                    {
+                        Name = username,
+                        Password = password,
+                        Quota = mailbox.MailboxQuota
+                    };
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException($"Password incorrect for source mailbox of name {username}.");
+                }
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Source mailbox of name {username} not found.");
+            }
+        }
+
+        public async Task<IEnumerable<IMail>> GetMails(Migrator.Common.Mailbox mailbox)
+        {
+            var filename = GetFilename(mailbox.Name);
+            var fileContents = await File.ReadAllTextAsync(filename);
+            var fmailbox = GetMailbox(fileContents);
+            return fmailbox?.Mails ?? Enumerable.Empty<IMail>();
+        }
+
         public async Task CreateMailbox(Migrator.Common.Mailbox mailbox)
         {
             var filename = GetFilename(mailbox.Name);
@@ -30,19 +65,9 @@ namespace AlmostMailProvider
             }, JsonSerializerOptions));
         }
 
-        public Task<Migrator.Common.Mailbox> GetMailbox(string username, string password)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<IMail>> GetMails(Migrator.Common.Mailbox mailbox)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task WriteMail(Migrator.Common.Mailbox mailbox, IMail mail)
         {
-            await Task.Run(() => //The reason for such a strange solution is that mutex need to be released by the same thread what created it.
+            await Task.Run(() => //The reason for such a strange solution is that mutex need to be released by the same thread that created it.
             {
                 var filename = GetFilename(mailbox.Name);
                 if (!File.Exists(filename))
@@ -55,7 +80,7 @@ namespace AlmostMailProvider
                 {
                     mutex.WaitOne();
                     var fileContents = File.ReadAllText(filename);
-                    var fmailbox = JsonSerializer.Deserialize<Mailbox>(fileContents, JsonSerializerOptions) ?? throw new Exception($"Mailbox {mailbox.Name} corrupt.");
+                    var fmailbox = GetMailbox(fileContents) ?? throw new Exception($"Mailbox {mailbox.Name} corrupt.");
                     fmailbox.Mails ??= [];
                     fmailbox.Mails.Add(new AlmostMail()
                     {
@@ -84,6 +109,11 @@ namespace AlmostMailProvider
         private string GetFilename(string name)
         {
             return Path.Combine(Migration.PathBase, Name, name + ".json");
+        }
+
+        private static Mailbox? GetMailbox(string fileContents)
+        {
+            return JsonSerializer.Deserialize<Mailbox>(fileContents, JsonSerializerOptions);
         }
     }
 }
