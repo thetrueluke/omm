@@ -11,6 +11,9 @@ namespace Migrator.Common
 {
     public class MigrationData
     {
+        private readonly static Encoding encoding = Encoding.Unicode;
+
+
         public required string ProviderName { get; init; }
 
         public required Mailbox Mailbox { get; init; }
@@ -19,13 +22,17 @@ namespace Migrator.Common
 
 
         public byte[] Serialize()
-        {            
-            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this, GetSerializerOptions()));
+        {
+            var serialized = JsonConvert.SerializeObject(this, GetSerializerOptions());
+            var bytes = encoding.GetBytes(serialized);
+            return bytes;
         }
 
         public static MigrationData? Deserialize(byte[] data)
         {
-            return JsonConvert.DeserializeObject<MigrationData>(Encoding.UTF8.GetString(data), GetSerializerOptions());
+            var serialized = encoding.GetString(data);
+            var deserialized = JsonConvert.DeserializeObject<MigrationData>(serialized, GetSerializerOptions());
+            return deserialized;
         }
 
         private static JsonSerializerSettings GetSerializerOptions()

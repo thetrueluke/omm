@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using Migrator.Common;
 
 namespace AlmostMailProvider
@@ -8,7 +10,8 @@ namespace AlmostMailProvider
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
-            WriteIndented = true
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
         };
 
         public string Name => GetType().Name.Replace("Provider", "");
