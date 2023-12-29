@@ -45,6 +45,7 @@ consumer.Received += (model, ea) =>
     catch (Exception ex)
     {
         Console.Error.WriteLine(ex.Message);
+        throw;
     }
 };
 channel.BasicConsume(queue: Migration.QueueName,

@@ -18,10 +18,4 @@
     <ProjectReference Include="..\Migrator.Common\Migrator.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="MerelyMail.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

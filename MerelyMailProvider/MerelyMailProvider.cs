@@ -17,7 +17,7 @@ namespace MerelyMailProvider
         public async Task<Mailbox> GetMailbox(string username, string password)
         {
             using var context = new Models.MerelyMailContext();
-            var mailbox = (await GetDbMailbox(context, username, password)) ?? throw new KeyNotFoundException($"Mailbox with name {username} not found."); //ToDo: Add throwing on wrong password only.
+            var mailbox = (await GetDbMailbox(context, username, password)) ?? throw new KeyNotFoundException($"Source mailbox of name {username} not found or password doesn't match."); //ToDo: Add throwing on wrong password only.
             return new Mailbox()
             {
                 Name = mailbox.Email,
