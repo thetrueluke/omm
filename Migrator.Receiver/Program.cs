@@ -34,8 +34,20 @@ consumer.Received += (model, ea) =>
         if (data is not null)
         {
             var destinationProvider = MailProviderFactory.GetMailProvier(data.ProviderName) ?? throw new Exception($"No such mail provider: {data.ProviderName}");
-            destinationProvider.WriteMail(data.Mailbox, data.Mail);
-            Console.WriteLine($"Added mail to mailbox {data.Mailbox.Name}");
+            destinationProvider.WriteMail(data.Mailbox, data.Mail) //.Wait();
+            .ContinueWith(task =>
+            {
+                try
+                {
+                    task.Wait();
+                    Console.WriteLine($"Added mail to mailbox {data.Mailbox.Name}");
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+                    //throw; At this point, throw doesn't make much sense as we already returned to the caller and the message has already been dequeued and processed.
+                }
+            });
         }
         else
         {

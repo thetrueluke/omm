@@ -39,43 +39,43 @@ namespace AlmostMailProvider
 
         public async Task WriteMail(Migrator.Common.Mailbox mailbox, IMail mail)
         {
-            var filename = GetFilename(mailbox.Name);
-            if (!File.Exists(filename))
+            await Task.Run(() => //The reason for such a strange solution is that mutex need to be released by the same thread what created it.
             {
-                throw new Exception($"Mailbox with name {mailbox.Name} doesn't exists.");
-            }
-
-            try
-            {
-                using var stream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-
-                var fmailbox = await JsonSerializer.DeserializeAsync<Mailbox>(stream, JsonSerializerOptions) ?? throw new Exception($"Mailbox {mailbox.Name} corrupt.");
-                fmailbox.Mails ??= [];
-                fmailbox.Mails.Add(new AlmostMail()
+                var filename = GetFilename(mailbox.Name);
+                if (!File.Exists(filename))
                 {
-                    Receiver = mail.Receiver,
-                    Sender = mail.Sender,
-                    Body = mail.Body,
-                    Folder = mail.Folder,
-                    Size = mail.Size,
-                    Subject = mail.Subject
-                });
-                fmailbox.MailboxSize = (double)fmailbox.Mails.Sum(m => m.Size) / 1024 / 1024 / 1024;
-
-                stream.Position = 0;
-                JsonSerializer.Serialize(stream, fmailbox, JsonSerializerOptions);
-            }
-            catch (IOException)
-            {
-                const int ERROR_SHARING_VIOLATION = 32;
-                if (Marshal.GetLastWin32Error() == ERROR_SHARING_VIOLATION)
-                {
-                    Console.WriteLine("The process cannot access the file because it is being used by another process.");
+                    throw new Exception($"Mailbox with name {mailbox.Name} doesn't exists.");
                 }
-                throw;
-            }
 
-            //File.WriteAllText(filename, JsonSerializer.Serialize(fmailbox, JsonSerializerOptions));
+                var mutex = new Mutex(false, $"{GetType().Name}|{filename.Replace(@"\", "/")}"); //'\' character is reserved for mutex' path prefix. Also, we specify false in initiallyOwned, as we acquire it with WaitOne in try block cause it can throw (e.g.) abondoned exception.
+                try
+                {
+                    mutex.WaitOne();
+                    var fileContents = File.ReadAllText(filename);
+                    var fmailbox = JsonSerializer.Deserialize<Mailbox>(fileContents, JsonSerializerOptions) ?? throw new Exception($"Mailbox {mailbox.Name} corrupt.");
+                    fmailbox.Mails ??= [];
+                    fmailbox.Mails.Add(new AlmostMail()
+                    {
+                        Receiver = mail.Receiver,
+                        Sender = mail.Sender,
+                        Body = mail.Body,
+                        Folder = mail.Folder,
+                        Size = mail.Size,
+                        Subject = mail.Subject
+                    });
+                    fmailbox.MailboxSize = (double)fmailbox.Mails.Sum(m => m.Size) / 1024 / 1024 / 1024;
+
+                    File.WriteAllText(filename, JsonSerializer.Serialize(fmailbox, JsonSerializerOptions));
+                }
+                //catch (Exception ex)
+                //{
+                //    throw;
+                //}
+                finally
+                {
+                    mutex.ReleaseMutex();
+                }
+            });
         }
 
         private string GetFilename(string name)
