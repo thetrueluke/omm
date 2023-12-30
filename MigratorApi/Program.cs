@@ -1,3 +1,4 @@
+using MigratorApi.Services;
 
 namespace MigratorApi
 {
@@ -8,11 +9,13 @@ namespace MigratorApi
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSingleton<MessageInfoService, MessageInfoService>();
 
             var app = builder.Build();
 

@@ -9,6 +9,7 @@ Console.CancelKeyPress += (sender, e) =>
     quitEvent.Set();
     e.Cancel = true;
 };
+
 //Required to load mail provider assemblies before they can be instantiated by the MailProviderFactory (this is not really a production approach).
 Console.WriteLine(new MerelyMailProvider.MerelyMailProvider().Name);
 Console.WriteLine(new AlmostMailProvider.AlmostMailProvider().Name);
@@ -40,6 +41,7 @@ consumer.Received += (model, ea) =>
                 try
                 {
                     task.Wait();
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     Console.WriteLine($"Added mail to mailbox {data.Mailbox.Name}");
                 }
                 catch (Exception ex)
@@ -61,7 +63,7 @@ consumer.Received += (model, ea) =>
     }
 };
 channel.BasicConsume(queue: Migration.QueueName,
-                     autoAck: true,
+                     autoAck: false,
                      consumer: consumer);
 
 quitEvent.WaitOne();

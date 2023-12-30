@@ -2,6 +2,7 @@ using System.Security.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Migrator.Common;
 using MigratorApi.Api;
+using MigratorApi.Services;
 using RabbitMQ.Client;
 
 namespace MigratorApi.Controllers
@@ -10,11 +11,14 @@ namespace MigratorApi.Controllers
     [Route("[controller]")]
     public class BeginMigrationController : ControllerBase
     {
-        public BeginMigrationController(ILogger<BeginMigrationController> logger)
+        private readonly MessageInfoService messageInfoService;
+
+        public BeginMigrationController(ILogger<BeginMigrationController> logger, MessageInfoService messageInfoService)
         {
             //Required to load mail provider assemblies before they can be instantiated by the MailProviderFactory (this is not really a production approach).
             logger.LogInformation(new MerelyMailProvider.MerelyMailProvider().Name);
             logger.LogInformation(new AlmostMailProvider.AlmostMailProvider().Name);
+            this.messageInfoService = messageInfoService;
         }
 
         [HttpPost]
@@ -26,6 +30,10 @@ namespace MigratorApi.Controllers
                 var destinationProvider = MailProviderFactory.GetMailProvier(spec.DestinationMailProvider) ?? throw new ArgumentException($"No such mail provider: {spec.DestinationMailProvider}");
 
                 var mailbox = await sourceProvider.GetMailbox(spec.Mailbox.Name, spec.Mailbox.Password);
+                if (messageInfoService.IsMailboxAlreadyAdded(mailbox))
+                {
+                    throw new ArgumentException($"Mailbox {spec.Mailbox.Name} is already being processed.");
+                }
                 await destinationProvider.CreateMailbox(mailbox);
 
                 EnqueueMails(sourceProvider, destinationProvider, mailbox);
@@ -57,6 +65,8 @@ namespace MigratorApi.Controllers
                 var factory = new ConnectionFactory { HostName =  Migration.HostName};
                 using var connection = factory.CreateConnection();
                 using var channel = connection.CreateModel();
+                
+                channel.ConfirmSelect();
 
                 channel.QueueDeclare(queue: Migration.QueueName,
                                      durable: false,
@@ -64,7 +74,10 @@ namespace MigratorApi.Controllers
                                      autoDelete: false,
                                      arguments: null);
 
-                var mails = sourceProvider.GetMails(mailbox).Result;
+                var mails = sourceProvider.GetMails(mailbox).Result.ToList();
+
+                messageInfoService.AddChannel(mailbox, (channel, mails.Count));
+
                 foreach (var mail in mails)
                 {
                     var data = new MigrationData()
@@ -80,6 +93,9 @@ namespace MigratorApi.Controllers
                                          basicProperties: null,
                                          body: body);
                 }
+
+                channel.WaitForConfirms();
+                messageInfoService.RemoveChannel(mailbox);
             });
         }
     }
