@@ -120,7 +120,7 @@ Both endpoints accept POST method only.
     }
   }
   ```
-  Note that `destinationMailProvider` and `mailbox.quota` parameters are not used in this api but due to a bug in the data model they are still required, so please use some dummy values for them, like an ampty string and -1 respectively.
+  Note that `destinationMailProvider` and `mailbox.quota` parameters are not used in this api but due to a bug in the data model they are still required, so please use some dummy values for them, like an empty string and `-1` respectively.
 ## Remarks
 - Attempting at running a migration for a mailbox that already has been scheduled for migration or has already been migrated will result in an error. This is by design.
 - Attempting at getting status for a mailbox that is not being migrated at the moment will result in an error (404 most likely).
