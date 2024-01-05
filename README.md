@@ -125,4 +125,5 @@ Both endpoints accept POST method only.
 - Attempting at running a migration for a mailbox that already has been scheduled for migration or has already been migrated will result in an error. This is by design.
 - Attempting at getting status for a mailbox that is not being migrated at the moment will result in an error (404 most likely).
 - Migrating a mailbox from the same source and destination provider is not allowed.
+- Migrating the same mailbox more than once is not allowed.
 - Working directory has been hardcoded to `D:\omm`. Should this path be changed, please edit the `Migrator.Common.Migration.PathBase` constant field value in the `Migrator.Common\Migration.cs` file.
